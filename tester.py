@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import descriptor
-
+import sampling_pattern
 
 def test_distance_method():
     descriptor1 = "01110011000000000000000000000000000000000000000000000000000000000000000000000"
@@ -24,9 +24,9 @@ def check(id, desc1, desc2, correct_value):
 
 
 def main():
-    for i in range(100000): #100000
-        test_distance_method()
-
+    #for i in range(100000): #100000
+    #    test_distance_method()
+    sampling_pattern.get_sampling_pattern(63, 6)
 
 if __name__ == '__main__':
     main()
