@@ -11,10 +11,10 @@ def get_sampling_pattern(pattern_size, circle_points_number):
     center_point = _get_pattern_center(pattern_size)
     distances = _get_distances()
     _set_blurring_points(sampling_pattern, 2, center_point, point_serial_num, pattern_size)
-    _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
-    image = _create_image(sampling_pattern)
-    show_image('sd', image, 0)
-    return sampling_pattern
+    max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
+    #image = _create_image(sampling_pattern)
+    #show_image('sd', image, 0)
+    return sampling_pattern, max_num
 
 
 def _create_image(pattern):
@@ -52,7 +52,7 @@ def _get_pattern_center(pattern_size):
 def _set_blurring_points(pattern, radius, point, point_number, pattern_size):
     for i in range(max(point[0] - int(radius+2), 0), min(point[0] + int(radius + 4), pattern_size - 1)):
         for j in range(max(point[1] - int(radius+2), 0), min(point[1] + int(radius + 4), pattern_size - 1)):
-            if _distance_between_points((i, j), point) <= radius + 0.2:  # heheszki wartość z palca
+            if _distance_between_points((i, j), point) <= radius + 0.3:  # heheszki wartość z palca
                 (pattern[j][i]).append(point_number)
 
 
@@ -100,6 +100,7 @@ def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_num
                                                             circle_points_number,
                                                             point_serial_num,
                                                             angle)
+    return counter
 
 
 def show_image(text, image, time):

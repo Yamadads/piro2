@@ -1,11 +1,11 @@
-from brisk import describe_point as brisk_describe
+from extractor import describe_point as describe
 import numpy as np
 
 
 def extract(image, keypoints):
     descriptions = []
     for i in keypoints:
-        descriptions.append(brisk_describe(image, keypoints[i]))
+        descriptions.append(describe(image, keypoints[i]))
     return descriptions
 
 
@@ -28,3 +28,6 @@ def distance(descriptor1, descriptor2):
     #     if specific_distance <= min_distance:
     #         min_distance = specific_distance
     # return min_distance
+
+def _calc_points(image):
+    return
