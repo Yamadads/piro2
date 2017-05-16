@@ -1,11 +1,15 @@
 from extractor import describe_point as describe
+import sampling_pattern as sp
 import numpy as np
 
 
-def extract(image, keypoints):
+def extract(image, keypoints, parameters):
+    pattern, gaussian_kernels_number = sp.get_sampling_pattern(parameters['pattern_size'],
+                                      parameters['circle_points_number'],
+                                      parameters['distances'])
     descriptions = []
     for i in keypoints:
-        descriptions.append(describe(image, keypoints[i]))
+        descriptions.append(describe(image, keypoints[i], pattern, gaussian_kernels_number, parameters))
     return descriptions
 
 
@@ -28,6 +32,7 @@ def distance(descriptor1, descriptor2):
     #     if specific_distance <= min_distance:
     #         min_distance = specific_distance
     # return min_distance
+
 
 def _calc_points(image):
     return

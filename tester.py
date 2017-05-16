@@ -4,6 +4,7 @@ import descriptor
 import sampling_pattern
 import cv2
 import os.path
+import parameters as param
 
 
 def test_distance_method():
@@ -45,8 +46,9 @@ def load_pictures(directory_path, pictures_no):
 def calc_descriptors(pictures, pictures_no):
     descriptors = []
     keypoints = [(31,31)]
+    parameters = param.get_parameters()
     for i in range(pictures_no):
-        descriptors.append(descriptor.extract(pictures[i], keypoints))
+        descriptors.append(descriptor.extract(pictures[i], keypoints, parameters))
 
 
 def check_descriptor():

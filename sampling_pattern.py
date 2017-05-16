@@ -4,12 +4,11 @@ import numpy as np
 from PIL import Image
 
 
-def get_sampling_pattern(pattern_size, circle_points_number):
+def get_sampling_pattern(pattern_size, circle_points_number, distances):
     point_serial_num = int(0)
 
     sampling_pattern = _init_pattern(pattern_size)
     center_point = _get_pattern_center(pattern_size)
-    distances = _get_distances()
     _set_blurring_points(sampling_pattern, 2, center_point, point_serial_num, pattern_size)
     max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
     #image = _create_image(sampling_pattern)
@@ -74,13 +73,6 @@ def _set_circle_points(pattern, radius, center, pattern_size, circle_points_numb
 
 def _distance_between_points(point1, point2):
     return math.sqrt(math.pow(point1[1] - point2[1], 2) + math.pow(point1[0] - point2[0], 2))
-
-
-def _get_distances():
-    distances = [3]
-    for i in range(20):
-        distances.append(distances[i] + i * 2)
-    return distances
 
 
 def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_number, point_serial_num):
