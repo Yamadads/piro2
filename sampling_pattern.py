@@ -2,6 +2,7 @@ import math
 import cv2
 import numpy as np
 from PIL import Image
+import copy
 
 
 def get_sampling_pattern(pattern_size, circle_points_number, distances):
@@ -11,8 +12,8 @@ def get_sampling_pattern(pattern_size, circle_points_number, distances):
     center_point = _get_pattern_center(pattern_size)
     _set_blurring_points(sampling_pattern, 2, center_point, point_serial_num, pattern_size)
     max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
-    image = _create_image(sampling_pattern)
-    show_image('sd', image, 0)
+    #image = _create_image(sampling_pattern)
+    #show_image('sd', image, 0)
     return sampling_pattern, max_num
 
 
@@ -77,22 +78,24 @@ def _distance_between_points(point1, point2):
 
 def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_number, point_serial_num):
     pattern_full = False
+    temp_distances = copy.deepcopy(distances)
     counter = 0
     start_angle = (2 * math.pi / circle_points_number) / 2
-    while not pattern_full:
+    while (not pattern_full) and temp_distances:
         counter += 1
         if counter% 2 == 0:
             angle = start_angle
         else:
             angle = 0
         pattern_full, point_serial_num = _set_circle_points(pattern,
-                                                            distances.pop(0),
+                                                            temp_distances.pop(0),
                                                             center,
                                                             pattern_size,
                                                             circle_points_number,
                                                             point_serial_num,
                                                             angle)
-    return counter
+    point_serial_num += 1
+    return point_serial_num
 
 
 def show_image(text, image, time):

@@ -9,7 +9,7 @@ def extract(image, keypoints, parameters):
                                                                parameters['distances'])
     descriptions = []
     for i in keypoints:
-        descriptions.append(describe(image, keypoints[i], pattern, gaussian_kernels_number, parameters))
+        descriptions.append(describe(image, i, pattern, gaussian_kernels_number, parameters))
     return descriptions
 
 

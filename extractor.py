@@ -4,8 +4,7 @@ import math
 def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
     gaussian_kernels = _calc_gaussian_kernels(image, point, pattern, gaussian_kernels_number)
     gaussian_kernels_levels = _create_kernel_levels(gaussian_kernels, parameters['circle_points_number'])
-    comparisons = []
-    comparisons += _center_comparisons(gaussian_kernels_levels, parameters['levels_to_compare_center'])
+    comparisons = _center_comparisons(gaussian_kernels_levels, parameters['levels_to_compare_center'])
     comparisons += _inner_circles_comparisons(gaussian_kernels_levels, parameters['inner_steps'],
                                               parameters['levels_to_compare_inner'])
     comparisons += _circles_comparisons(gaussian_kernels_levels, parameters['outer_steps'], parameters['levels_pairs'])
@@ -15,7 +14,7 @@ def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
 def _circles_comparisons(kernel_levels, steps, levels_pairs):
     comparisons = []
     for i in levels_pairs:
-        if kernel_levels[i[0]] and kernel_levels[i[1]]:
+        if i[0] in kernel_levels and i[1] in kernel_levels:
             comparisons.append(_circles_all_steps_comparisons(kernel_levels[i[0]], kernel_levels[i[1]], steps))
     return comparisons
 
@@ -42,7 +41,7 @@ def _circles_comparison(kernel1, kernel2, step):
 def _inner_circles_comparisons(kernel_levels, steps, levels_to_compare):
     comparisons = []
     for i in levels_to_compare:
-        if kernel_levels[i]:
+        if i in kernel_levels:
             comparisons.append(_inner_circle_comparisons(kernel_levels[i]), steps)
     return comparisons
 
@@ -69,8 +68,8 @@ def _inner_circle_comparison(kernel_level, step):
 def _center_comparisons(kernel_levels, levels_to_compare):
     comparisons = []
     for i in levels_to_compare:
-        if kernel_levels[i]:
-            comparisons.append(_center_comparison(kernel_levels[i]), kernel_levels[0])
+        if i in kernel_levels:
+            comparisons.append(_center_comparison(kernel_levels[i], kernel_levels[0]))
     return comparisons
 
 
@@ -110,7 +109,7 @@ def _calc_gaussian_kernels(image, point, pattern, gaussian_kernels_number):
 
 def _init_kernels(kernels_number):
     kernels = []
-    for i in range(len(kernels_number)):
+    for i in range(kernels_number):
         kernel = [0, 0]
         kernels.append(kernel)
     return kernels

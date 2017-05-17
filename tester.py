@@ -46,21 +46,32 @@ def load_pictures(directory_path, pictures_no):
 
 def calc_descriptors(pictures, pictures_no):
     descriptors = []
-    keypoints = [(31, 31)]
+    keypoints = [[31, 31]]
     parameters = param.get_parameters()
     for i in range(pictures_no):
         descriptors.append(descriptor.extract(pictures[i], keypoints, parameters))
+    return descriptors
+
+
+def read_maches_file(path):
+    matches = []
+    with open(path) as f:
+        lines = f.read().splitlines()
+    print(lines)
 
 
 def check_descriptor():
-    path = 'samples/bikes/'
+    data_path = 'samples/bikes/'
+    matches_filename = 'matches.csv'
     pictures_no = 749
-    pictures = load_pictures(path, pictures_no)
+    pictures = load_pictures(data_path, pictures_no)
+    matches = read_maches_file(data_path + matches_filename)
+    calc_descriptors(pictures, pictures_no)
 
 
 def main():
-    # check_descriptor()
-    check_sampling_pattern()
+    check_descriptor()
+    # check_sampling_pattern()
 
 
 if __name__ == '__main__':

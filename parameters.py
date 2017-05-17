@@ -18,6 +18,6 @@ def get_parameters():
 
 def _get_distances():
     distances = [3]
-    for i in range(20):
+    for i in range(50):
         distances.append(distances[i] + i * 2)
     return distances
