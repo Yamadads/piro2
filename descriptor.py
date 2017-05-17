@@ -15,6 +15,10 @@ def extract(image, keypoints, parameters):
 
 def distance(descriptor1, descriptor2, parameters):
     min_global_distance = len(descriptor1) * parameters['circle_points_number']
+    #print("------------------------------------------")
+    #print(descriptor1)
+    #print(descriptor2)
+    #print("------------------------------------------")
     for i in range(parameters['circle_points_number']):
         distance_sum = 0
         for j in range(len(descriptor1)):

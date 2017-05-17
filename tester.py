@@ -44,10 +44,9 @@ def load_pictures(directory_path, pictures_no):
     return pictures
 
 
-def calc_descriptors(pictures, pictures_no):
+def calc_descriptors(pictures, pictures_no, parameters):
     descriptors = []
     keypoints = [[31, 31]]
-    parameters = param.get_parameters()
     for i in range(pictures_no):
         descriptors.append(descriptor.extract(pictures[i], keypoints, parameters))
     return descriptors
@@ -57,17 +56,26 @@ def read_maches_file(path):
     matches = []
     with open(path) as f:
         lines = f.read().splitlines()
-    print(lines)
+    for i in lines:
+        line = i.split(",")
+        matches.append([int(line[0]), int(line[1])])
+    return matches
 
 
 def check_descriptor():
     data_path = 'samples/bikes/'
     matches_filename = 'matches.csv'
-    pictures_no = 749
+    pictures_no = 750
     pictures = load_pictures(data_path, pictures_no)
     matches = read_maches_file(data_path + matches_filename)
-    calc_descriptors(pictures, pictures_no)
-
+    parameters = param.get_parameters()
+    descriptors = calc_descriptors(pictures, pictures_no, parameters)
+    for i in range(len(matches)):
+        descriptor1 = descriptors[matches[i][0]][0]
+        descriptor2 = descriptors[matches[i][1]][0]
+        matches[i].append(descriptor.distance(descriptor1, descriptor2, parameters))
+    for i in matches:
+        print(i)
 
 def main():
     check_descriptor()

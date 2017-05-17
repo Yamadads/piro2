@@ -14,8 +14,8 @@ def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
 def _circles_comparisons(kernel_levels, steps, levels_pairs):
     comparisons = []
     for i in levels_pairs:
-        if i[0] in kernel_levels and i[1] in kernel_levels:
-            comparisons.append(_circles_all_steps_comparisons(kernel_levels[i[0]], kernel_levels[i[1]], steps))
+        if (i[0] > 0) and (i[0] < len(kernel_levels)) and (i[1] > 0) and (i[1] < len(kernel_levels)):
+            comparisons += _circles_all_steps_comparisons(kernel_levels[i[0]], kernel_levels[i[1]], steps)
     return comparisons
 
 
@@ -23,7 +23,7 @@ def _circles_all_steps_comparisons(kernel1, kernel2, steps):
     comparisons = []
     for i in steps:
         if (i >= 0) and (i < len(kernel1)):
-            comparisons.append(_circles_comparison((kernel1, kernel2, i)))
+            comparisons.append(_circles_comparison(kernel1, kernel2, i))
     return comparisons
 
 
@@ -35,14 +35,14 @@ def _circles_comparison(kernel1, kernel2, step):
             level_descriptor += '1'
         else:
             level_descriptor += '0'
-    return level_descriptor
+    return int(level_descriptor, 2)
 
 
 def _inner_circles_comparisons(kernel_levels, steps, levels_to_compare):
     comparisons = []
     for i in levels_to_compare:
-        if i in kernel_levels:
-            comparisons.append(_inner_circle_comparisons(kernel_levels[i]), steps)
+        if (i > 0) and (i < len(kernel_levels)):
+            comparisons += _inner_circle_comparisons(kernel_levels[i], steps)
     return comparisons
 
 
@@ -50,7 +50,7 @@ def _inner_circle_comparisons(kernel_level, steps):
     comparisons = []
     for i in steps:
         if (i > 0) and (i < len(kernel_level)):
-            comparisons.append(_inner_circle_comparison((kernel_level, i)))
+            comparisons.append(_inner_circle_comparison(kernel_level, i))
     return comparisons
 
 
@@ -62,13 +62,13 @@ def _inner_circle_comparison(kernel_level, step):
             level_descriptor += '1'
         else:
             level_descriptor += '0'
-    return level_descriptor
+    return int(level_descriptor, 2)
 
 
 def _center_comparisons(kernel_levels, levels_to_compare):
     comparisons = []
     for i in levels_to_compare:
-        if i in kernel_levels:
+        if (i > 0) and (i < len(kernel_levels)):
             comparisons.append(_center_comparison(kernel_levels[i], kernel_levels[0]))
     return comparisons
 
