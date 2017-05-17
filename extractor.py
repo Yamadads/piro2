@@ -12,7 +12,7 @@ def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
 
 
 def _inner_circles_comparisons(kernel_levels, steps, levels_to_compare):
-    comparisons = []    
+    comparisons = []
     for i in levels_to_compare:
         if kernel_levels[i]:
             comparisons.append(_inner_circle_comparisons(kernel_levels[i]), steps)

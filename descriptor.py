@@ -23,8 +23,7 @@ def distance(descriptor1, descriptor2, parameters):
             descriptor2[j] = descriptor2[j] >> 1 if descriptor2[j] >= 0 else (descriptor2[j] + 0x100000000) >> 1
         if distance_sum < min_global_distance:
             min_global_distance = distance_sum
-    return min_global_distance
-
+    return min_global_distance / (len(descriptor1) * parameters['circle_points_number'])
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)
