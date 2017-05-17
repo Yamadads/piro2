@@ -8,7 +8,35 @@ def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
     comparisons += _center_comparisons(gaussian_kernels_levels, parameters['levels_to_compare_center'])
     comparisons += _inner_circles_comparisons(gaussian_kernels_levels, parameters['inner_steps'],
                                               parameters['levels_to_compare_inner'])
+    comparisons += _circles_comparisons(gaussian_kernels_levels, parameters['outer_steps'], parameters['levels_pairs'])
     return comparisons
+
+
+def _circles_comparisons(kernel_levels, steps, levels_pairs):
+    comparisons = []
+    for i in levels_pairs:
+        if kernel_levels[i[0]] and kernel_levels[i[1]]:
+            comparisons.append(_circles_all_steps_comparisons(kernel_levels[i[0]], kernel_levels[i[1]], steps))
+    return comparisons
+
+
+def _circles_all_steps_comparisons(kernel1, kernel2, steps):
+    comparisons = []
+    for i in steps:
+        if (i >= 0) and (i < len(kernel1)):
+            comparisons.append(_circles_comparison((kernel1, kernel2, i)))
+    return comparisons
+
+
+def _circles_comparison(kernel1, kernel2, step):
+    level_descriptor = ''
+    l = len(kernel1)
+    for i in range(l):
+        if kernel1[i] > kernel2[(i + step) % l]:
+            level_descriptor += '1'
+        else:
+            level_descriptor += '0'
+    return level_descriptor
 
 
 def _inner_circles_comparisons(kernel_levels, steps, levels_to_compare):

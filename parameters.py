@@ -10,6 +10,9 @@ def get_parameters():
     config['inner_steps'] = [1, 2, 3]  # from 1 to half of the circle_points_number
     config['levels_to_compare_inner'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                                          12]  # level IDs to compare with center, can be greater than levels number, from 1 to infinity
+    config['outer_steps'] = [0, 1, 2, 3, 4, 5]  # from 0 to circle_points_number - 1
+    config['levels_pairs'] = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8),
+                              (8, 9)]  # all pairs to compare from 1 to number of circles
     return config
 
 
