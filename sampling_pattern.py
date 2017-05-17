@@ -11,8 +11,8 @@ def get_sampling_pattern(pattern_size, circle_points_number, distances):
     center_point = _get_pattern_center(pattern_size)
     _set_blurring_points(sampling_pattern, 2, center_point, point_serial_num, pattern_size)
     max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
-    #image = _create_image(sampling_pattern)
-    #show_image('sd', image, 0)
+    image = _create_image(sampling_pattern)
+    show_image('sd', image, 0)
     return sampling_pattern, max_num
 
 
@@ -21,7 +21,7 @@ def _create_image(pattern):
     for i in range(len(pattern)):
         for j in range(len(pattern)):
             if pattern[i][j]:
-                if (pattern[i][j][0] > 0) and (pattern[i][j][0] < 7):
+                if (pattern[i][j][0] > 30) and (pattern[i][j][0] < 1000):
                     image[i][j] = 255
     return image
 

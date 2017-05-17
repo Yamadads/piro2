@@ -2,9 +2,58 @@ import math
 
 
 def describe_point(image, point, pattern, gaussian_kernels_number, parameters):
-    gaussian_kernels = _calc_gaussian_kernels(pattern, gaussian_kernels_number)
+    gaussian_kernels = _calc_gaussian_kernels(image, point, pattern, gaussian_kernels_number)
+    gaussian_kernels_levels = _create_kernel_levels(gaussian_kernels, parameters['circle_points_number'])
+    comparisons = []
+    comparisons += _center_comparisons(gaussian_kernels_levels, parameters['levels_to_compare_center'])
+    comparisons += _inner_circles_comparisons(gaussian_kernels_levels, parameters['inner_steps'],
+                                              parameters['levels_to_compare_inner'])
+    return comparisons
 
-    return 0
+
+def _inner_circles_comparisons(kernel_levels, steps, levels_to_compare):
+    comparisons = []    
+    for i in levels_to_compare:
+        if kernel_levels[i]:
+            comparisons.append(_inner_circle_comparisons(kernel_levels[i]), steps)
+    return comparisons
+
+
+def _inner_circle_comparisons(kernel_level, steps):
+    comparisons = []
+    for i in steps:
+        if (i > 0) and (i < len(kernel_level)):
+            comparisons.append(_inner_circle_comparison((kernel_level, i)))
+    return comparisons
+
+
+def _inner_circle_comparison(kernel_level, step):
+    level_descriptor = ''
+    l = len(kernel_level)
+    for i in range(l):
+        if kernel_level[i] > kernel_level[(i + step) % l]:
+            level_descriptor += '1'
+        else:
+            level_descriptor += '0'
+    return level_descriptor
+
+
+def _center_comparisons(kernel_levels, levels_to_compare):
+    comparisons = []
+    for i in levels_to_compare:
+        if kernel_levels[i]:
+            comparisons.append(_center_comparison(kernel_levels[i]), kernel_levels[0])
+    return comparisons
+
+
+def _center_comparison(kernel_level, center):
+    level_descriptor = ''
+    for i in range(len(kernel_level)):
+        if center > kernel_level[i]:
+            level_descriptor += '1'
+        else:
+            level_descriptor += '0'
+    return int(level_descriptor, 2)
 
 
 def _create_kernel_levels(kernels, points_number):

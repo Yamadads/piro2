@@ -30,7 +30,8 @@ def check(id, desc1, desc2, correct_value):
 
 
 def check_sampling_pattern():
-    sampling_pattern.get_sampling_pattern(63, 6)
+    params = param.get_parameters()
+    sampling_pattern.get_sampling_pattern(params['pattern_size'], params['circle_points_number'], params['distances'])
 
 
 def load_pictures(directory_path, pictures_no):
@@ -45,7 +46,7 @@ def load_pictures(directory_path, pictures_no):
 
 def calc_descriptors(pictures, pictures_no):
     descriptors = []
-    keypoints = [(31,31)]
+    keypoints = [(31, 31)]
     parameters = param.get_parameters()
     for i in range(pictures_no):
         descriptors.append(descriptor.extract(pictures[i], keypoints, parameters))
@@ -57,10 +58,9 @@ def check_descriptor():
     pictures = load_pictures(path, pictures_no)
 
 
-
-
 def main():
-    check_descriptor()
+    # check_descriptor()
+    check_sampling_pattern()
 
 
 if __name__ == '__main__':
