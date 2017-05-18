@@ -5,6 +5,7 @@ import sampling_pattern
 import cv2
 import os.path
 import parameters as param
+import copy
 
 
 def test_distance_method():
@@ -62,6 +63,21 @@ def read_maches_file(path):
     return matches
 
 
+def create_bad_matches():
+    matches = []
+    for i in range(400):
+        matches.append([i, 700 - i])
+    return matches
+
+
+def get_matches_results(matches, descriptors, parameters):
+    for i in range(len(matches)):
+        descriptor1 = copy.deepcopy(descriptors[matches[i][0]][0])
+        descriptor2 = copy.deepcopy(descriptors[matches[i][1]][0])
+        matches[i].append(descriptor.distance(descriptor1, descriptor2, parameters))
+    return matches
+
+
 def check_descriptor():
     data_path = 'samples/bikes/'
     matches_filename = 'matches.csv'
@@ -70,12 +86,16 @@ def check_descriptor():
     matches = read_maches_file(data_path + matches_filename)
     parameters = param.get_parameters()
     descriptors = calc_descriptors(pictures, pictures_no, parameters)
-    for i in range(len(matches)):
-        descriptor1 = descriptors[matches[i][0]][0]
-        descriptor2 = descriptors[matches[i][1]][0]
-        matches[i].append(descriptor.distance(descriptor1, descriptor2, parameters))
-    for i in matches:
+
+    good_matches = get_matches_results(matches, descriptors, parameters)
+    bad_matches = get_matches_results(create_bad_matches(), descriptors, parameters)
+    print("good")
+    for i in good_matches:
         print(i)
+    print("bad")
+    for i in bad_matches:
+        print(i)
+
 
 def main():
     check_descriptor()

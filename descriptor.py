@@ -15,19 +15,23 @@ def extract(image, keypoints, parameters):
 
 def distance(descriptor1, descriptor2, parameters):
     min_global_distance = len(descriptor1) * parameters['circle_points_number']
-    #print("------------------------------------------")
-    #print(descriptor1)
-    #print(descriptor2)
-    #print("------------------------------------------")
+    shift = 1 << (parameters['circle_points_number'] - 1)
     for i in range(parameters['circle_points_number']):
         distance_sum = 0
         for j in range(len(descriptor1)):
             distance_sum += bin(descriptor1[j] ^ descriptor2[j]).count('1')
-            descriptor1[j] = descriptor1[j] >> 1 if descriptor1[j] >= 0 else (descriptor1[j] + 0x100000000) >> 1
-            descriptor2[j] = descriptor2[j] >> 1 if descriptor2[j] >= 0 else (descriptor2[j] + 0x100000000) >> 1
-        if distance_sum < min_global_distance:
-            min_global_distance = distance_sum
+            descriptor1[j] = (descriptor1[j] >> 1) if (descriptor1[j] & 1) == 0 else ((descriptor1[j] >> 1) ^ shift)
+            descriptor2[j] = (descriptor2[j] >> 1) if (descriptor2[j] & 1) == 0 else ((descriptor2[j] >> 1) ^ shift)
+            if distance_sum < min_global_distance:
+                min_global_distance = distance_sum
     return min_global_distance / (len(descriptor1) * parameters['circle_points_number'])
+
+
+def roll(number):
+    m = len(number)
+    a = 1 ^ number
+    number >> 1
+    number = number ^ 2
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)
