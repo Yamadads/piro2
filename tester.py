@@ -6,7 +6,6 @@ import cv2
 import os.path
 import os
 import parameters as param
-import copy
 
 
 def test_distance_method():
@@ -63,7 +62,7 @@ def calc_descriptors(pictures, pictures_no, descriptor):
     return descriptors
 
 
-def read_maches_file(path):
+def read_matches_file(path):
     matches = []
     with open(path) as f:
         lines = f.read().splitlines()
@@ -84,13 +83,7 @@ def create_bad_matches():
 
 def get_matches_results(matches, descriptors, parameters, descriptor):
     for i in range(len(matches)):
-
-        obj_1 = descriptors[matches[i][0]]
-        obj_2 = descriptors[matches[i][1]]
-
-        descriptor1 = copy.deepcopy(obj_1[0])
-        descriptor2 = copy.deepcopy(obj_2[0])
-        matches[i].append(descriptor.distance(descriptor1, descriptor2, parameters))
+        matches[i].append(descriptor.distance(descriptors[matches[i][0]][0], descriptors[matches[i][1]][0], parameters))
     return matches
 
 
@@ -103,7 +96,7 @@ def check_descriptor():
     matches_filename = 'matches.csv'
     pictures_no = get_pictures_count(data_path)
     pictures = load_pictures(data_path, pictures_no)
-    matches = read_maches_file(os.path.join(data_path, matches_filename))
+    matches = read_matches_file(os.path.join(data_path, matches_filename))
 
     config = param.Parameters()
     config.dump_to_file(os.path.join(results_path, 'params'))

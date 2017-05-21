@@ -60,7 +60,7 @@ for case_name in ["bark", "bikes", "boat", "graf", "leuven", "trees", "wall"]:
                 if r < off_span or images[i].shape[0] - r <= off_span or c < off_span or images[i].shape[1] - c <= off_span:
                     continue
                 r, c = int(r * offscale), int(c * offscale)
-                transimg = transform.rotate(transform.rescale(images[i], offscale, mode="reflect"), offrot, center=(c, r),
+                transimg = transform.rotate(transform.rescale(images[i], offscale, mode="reflect"), offrot,
                                             mode="reflect")
                 if r < SPAN or transimg.shape[0] - r <= SPAN or c < SPAN or transimg.shape[1] - c <= SPAN:
                     continue
