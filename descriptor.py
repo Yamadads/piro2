@@ -42,7 +42,7 @@ class Descriptor(object):
                 c_descriptor2[j] = (c_descriptor2[j] >> 1) if (c_descriptor2[j] & 1) == 0 else ((c_descriptor2[j] >> 1) ^ shift)
                 if distance_sum < min_global_distance:
                     min_global_distance = distance_sum
-        return min_global_distance / (len(c_descriptor1) * parameters['circle_points_number'])
+        return min_global_distance #/ (len(c_descriptor1) * parameters['circle_points_number'])
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)

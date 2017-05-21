@@ -155,7 +155,7 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
 
 def check_descriptor():
 
-    suite_name = 'leuven'
+    suite_name = 'bark'
     data_path = os.path.join('samples', suite_name)
     results_path = os.path.join('results', suite_name)
 
