@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import descriptor as ds
-import sampling_pattern
 import cv2
 import os.path
 import os
 import parameters as param
+import random as rand
+import numpy as np
+import multiprocessing as mp
+import joblib as jb
+import threading
+
 
 
 def test_distance_method():
@@ -31,11 +36,6 @@ def test_distance_method():
 def check(suit_id, desc1, desc2, correct_value, parameters, descriptor):
     if descriptor.distance(desc1, desc2, parameters) != correct_value:
         print("false" + suit_id.__str__())
-
-
-def check_sampling_pattern():
-    params = param.get_parameters()
-    sampling_pattern.get_sampling_pattern(params['pattern_size'], params['circle_points_number'], params['distances'])
 
 
 def get_pictures_count(directory_path):
@@ -74,17 +74,95 @@ def read_matches_file(path):
     return sorted(matches, key=lambda x: (x[0], x[1]))
 
 
-def create_bad_matches():
-    matches = []
-    for i in range(400):
-        matches.append([i, 700 - i])
-    return matches
+def create_bad_matches(pictures_no, matches):
+
+    reserved = {}
+
+    rand.seed()
+
+    for pair in matches:
+        if pair[0] < pair[1]:
+            reserved['.'.join(map(str, pair))] = True
+        else:
+            reserved['.'.join(map(str, [pair[1], pair[0]]))] = True
+
+    bad_matches = []
+
+    while len(bad_matches) < pictures_no:
+
+        num_1 = rand.randint(0, pictures_no - 2)
+        num_2 = rand.randint(num_1 + 1, pictures_no - 1)
+
+        s_id = '.'.join(map(str, [num_1, num_2]))
+
+        if s_id not in reserved:
+            reserved[s_id] = True
+            bad_matches.append([num_1, num_2])
+
+    return bad_matches
 
 
 def get_matches_results(matches, descriptors, parameters, descriptor):
     for i in range(len(matches)):
         matches[i].append(descriptor.distance(descriptors[matches[i][0]][0], descriptors[matches[i][1]][0], parameters))
     return matches
+
+
+def get_results_mean(matches, descriptors, parameters, descriptor):
+
+    result = []
+
+    for i in range(len(matches)):
+        result.append(descriptor.distance(descriptors[matches[i][0]][0], descriptors[matches[i][1]][0], parameters))
+
+    return np.mean(result)
+
+
+def calculate_mean(circle_points_number, results_path, pictures, pictures_no, matches, bad_matches):
+    config = param.Parameters()
+
+    config.set('circle_points_number', circle_points_number)
+
+    results = []
+
+    for inner_steps in range(1, int(circle_points_number / 2)):
+        for levels_to_compare_center in [i for i in [1, 3, 7] if i <= circle_points_number]:
+            for levels_to_compare_inner in [i for i in [1, 3, 7] if i <= circle_points_number]:
+                for outer_steps in [i for i in [1, 3, 7] if i <= circle_points_number]:
+
+                    config.set('inner_steps', [i for i in range(1, int(circle_points_number / 2))])
+                    config.set('levels_to_compare_center', [i for i in [1, 3, 7] if i <= levels_to_compare_center])
+                    config.set('levels_to_compare_inner', [i for i in [1, 3, 7] if i <= levels_to_compare_inner])
+                    config.set('outer_steps', [i for i in [1, 3, 7] if i <= outer_steps])
+
+                    parameters = config.get_parameters()
+
+                    suite_name = 'params_{0}_{1}_{2}_{3}_{4}'.format(
+                        circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
+                    )
+
+                    dump_file_name = os.path.join(results_path, suite_name)
+
+                    descriptor = ds.Descriptor(parameters)
+
+                    descriptors = calc_descriptors(pictures, pictures_no, descriptor)
+
+                    good_matches_mean = get_results_mean(matches, descriptors, parameters, descriptor)
+                    bad_matches_mean = get_results_mean(bad_matches, descriptors, parameters, descriptor)
+
+                    mean_difference = bad_matches_mean - good_matches_mean
+
+                    with open(dump_file_name, "w+") as dump:
+                        dump.write('# Results section (good_mean, bad_mean, mean_difference\n')
+                        dump.write(','.join(map(str, [good_matches_mean, bad_matches_mean, mean_difference])))
+
+                    config.dump_to_file(dump_file_name)
+
+                    results.append(','.join(map(str, [suite_name, good_matches_mean, bad_matches_mean, mean_difference])))
+                    # print("good matches mean is {0}".format(good_matches_mean))
+                    # print("bad matches mean is {0}".format(bad_matches_mean))
+
+    return results
 
 
 def check_descriptor():
@@ -96,34 +174,43 @@ def check_descriptor():
     matches_filename = 'matches.csv'
     pictures_no = get_pictures_count(data_path)
     pictures = load_pictures(data_path, pictures_no)
+
     matches = read_matches_file(os.path.join(data_path, matches_filename))
+    bad_matches = create_bad_matches(pictures_no, matches)
 
-    config = param.Parameters()
-    config.dump_to_file(os.path.join(results_path, 'params'))
+    print("Data initialized")
 
-    parameters = config.get_parameters()
+    num_cores = mp.cpu_count()
+    print('cpu count {0}'.format(num_cores))
 
-    descriptor = ds.Descriptor(parameters)
+    results = jb.Parallel(n_jobs=7)(jb.delayed(calculate_mean)(
+        i, results_path, pictures, pictures_no, matches, bad_matches
+    ) for i in range(4, 11))
 
-    descriptors = calc_descriptors(pictures, pictures_no, descriptor)
+    with open(os.path.join(results_path, 'master_results'), "w+") as dump:
+        dump.write('suite_name, good_match_dist, bad_match_dist, diff\n')
+        for batch in results:
+            for line in batch:
+                dump.write(''.join([line, '\n']))
 
-    good_matches = get_matches_results(matches, descriptors, parameters, descriptor)
-    bad_matches = get_matches_results(create_bad_matches(), descriptors, parameters, descriptor)
+    print('tests end')
 
-    if False:
-        print("el1,el2,dist")
-        for i in good_matches:
-            print(','.join([str(e) for e in i]))
-
-    if True:
-        print("el1,el2,dist")
-        for i in bad_matches:
-            print(','.join([str(e) for e in i]))
+    # good_matches = get_matches_results(matches, descriptors, parameters, descriptor)
+    # bad_matches = get_matches_results(bad_matches, descriptors, parameters, descriptor)
+    #
+    # if False:
+    #     print("el1,el2,dist")
+    #     for i in good_matches:
+    #         print(','.join([str(e) for e in i]))
+    #
+    # if True:
+    #     print("el1,el2,dist")
+    #     for i in bad_matches:
+    #         print(','.join([str(e) for e in i]))
 
 
 def main():
     check_descriptor()
-    # check_sampling_pattern()
 
 
 if __name__ == '__main__':

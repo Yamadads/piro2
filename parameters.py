@@ -1,7 +1,7 @@
 import os as os
 
-class Parameters(object):
 
+class Parameters(object):
     def __init__(self):
         config = {}
 
@@ -13,7 +13,7 @@ class Parameters(object):
         config['levels_to_compare_center'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
         # from 1 to half of the circle_points_number
-        config['inner_steps'] = [1, 2, 3]
+        config['inner_steps'] = [i for i in range(int(config['circle_points_number'] / 2))]  # [1, 2, 3]
 
         # level IDs to compare with center, can be greater than levels number, from 1 to infinity
         config['levels_to_compare_inner'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -27,11 +27,15 @@ class Parameters(object):
 
         self.config = config
 
+    def set(self, name, value):
+        self.config[name] = value
+
     def get_parameters(self):
         return self.config
 
     def dump_to_file(self, filepath):
-        with open(filepath, "w+") as dump:
+        with open(filepath, "a") as dump:
+            dump.write('# Params section\n')
             for entry in self.config:
                 dump.write(','.join([entry, str(self.config[entry]), '\n']))
 

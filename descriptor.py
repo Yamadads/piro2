@@ -1,5 +1,6 @@
 from extractor import describe_point as describe
 import sampling_pattern as sp
+import copy as copy
 
 
 class Descriptor(object):
@@ -27,17 +28,21 @@ class Descriptor(object):
 
     @staticmethod
     def distance(descriptor1, descriptor2, parameters):
-        min_global_distance = len(descriptor1) * parameters['circle_points_number']
+
+        c_descriptor1 = copy.deepcopy(descriptor1)
+        c_descriptor2 = copy.deepcopy(descriptor2)
+
+        min_global_distance = len(c_descriptor1) * parameters['circle_points_number']
         shift = 1 << (parameters['circle_points_number'] - 1)
         for i in range(parameters['circle_points_number']):
             distance_sum = 0
-            for j in range(len(descriptor1)):
-                distance_sum += bin(descriptor1[j] ^ descriptor2[j]).count('1')
-                descriptor1[j] = (descriptor1[j] >> 1) if (descriptor1[j] & 1) == 0 else ((descriptor1[j] >> 1) ^ shift)
-                descriptor2[j] = (descriptor2[j] >> 1) if (descriptor2[j] & 1) == 0 else ((descriptor2[j] >> 1) ^ shift)
+            for j in range(len(c_descriptor1)):
+                distance_sum += bin(c_descriptor1[j] ^ c_descriptor2[j]).count('1')
+                c_descriptor1[j] = (c_descriptor1[j] >> 1) if (c_descriptor1[j] & 1) == 0 else ((c_descriptor1[j] >> 1) ^ shift)
+                c_descriptor2[j] = (c_descriptor2[j] >> 1) if (c_descriptor2[j] & 1) == 0 else ((c_descriptor2[j] >> 1) ^ shift)
                 if distance_sum < min_global_distance:
                     min_global_distance = distance_sum
-        return min_global_distance / (len(descriptor1) * parameters['circle_points_number'])
+        return min_global_distance / (len(c_descriptor1) * parameters['circle_points_number'])
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)
