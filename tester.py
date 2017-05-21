@@ -175,7 +175,7 @@ def check_descriptor():
 
     results = jb.Parallel(n_jobs=num_cores)(jb.delayed(calculate_mean)(
         results_path, pictures, pictures_no, matches, bad_matches, configurations[i]
-    ) for i in range(10))
+    ) for i in range(len(configurations)))
 
     with open(os.path.join(results_path, 'master_results'), "w+") as dump:
         dump.write('suite_name, good_match_dist, bad_match_dist, diff\n')
