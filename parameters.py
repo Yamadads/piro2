@@ -1,39 +1,51 @@
-def get_parameters():
-    config = {}
+import os as os
 
-    config['pattern_size'] = 63  # window size (odd)
-    config['circle_points_number'] = 8  # from 4 to 10
-    config['distances'] = _get_distances()  # Rays of successive circles, max distance = 30
+class Parameters(object):
 
-    # level IDs to compare with center, can be greater than levels number, from 1 to infinity
-    config['levels_to_compare_center'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    def __init__(self):
+        config = {}
 
-    # from 1 to half of the circle_points_number
-    config['inner_steps'] = [1, 2, 3]
+        config['pattern_size'] = 63  # window size (odd)
+        config['circle_points_number'] = 8  # from 4 to 10
+        config['distances'] = self._get_distances()  # Rays of successive circles, max distance = 30
 
-    # level IDs to compare with center, can be greater than levels number, from 1 to infinity
-    config['levels_to_compare_inner'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        # level IDs to compare with center, can be greater than levels number, from 1 to infinity
+        config['levels_to_compare_center'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-    config['outer_steps'] = [0, 1, 2, 3, 4, 5]  # from 0 to circle_points_number - 1
+        # from 1 to half of the circle_points_number
+        config['inner_steps'] = [1, 2, 3]
 
-    config['levels_pairs'] = _get_level_pairs()  # [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8],
-    # [8, 9]]  # all pairs to compare from 1 to number of circles
+        # level IDs to compare with center, can be greater than levels number, from 1 to infinity
+        config['levels_to_compare_inner'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-    config['distance_threshold'] = 0.5
+        config['outer_steps'] = [0, 1, 2, 3, 4, 5]  # from 0 to circle_points_number - 1
 
-    return config
+        config['levels_pairs'] = self._get_level_pairs()  # [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8],
+        # [8, 9]]  # all pairs to compare from 1 to number of circles
 
+        config['distance_threshold'] = 0.5
 
-def _get_level_pairs():
-    pairs = []
-    for i in range(15):
-        for j in range(15):
-            pairs.append([i, j])
-    return pairs
+        self.config = config
 
+    def get_parameters(self):
+        return self.config
 
-def _get_distances():
-    distances = [3]
-    for i in range(50):
-        distances.append(distances[i] + i * 2)
-    return distances
+    def dump_to_file(self, filepath):
+        with open(filepath, "w+") as dump:
+            for entry in self.config:
+                dump.write(','.join([entry, str(self.config[entry]), '\n']))
+
+    @staticmethod
+    def _get_level_pairs():
+        pairs = []
+        for i in range(15):
+            for j in range(15):
+                pairs.append([i, j])
+        return pairs
+
+    @staticmethod
+    def _get_distances():
+        distances = [3]
+        for i in range(50):
+            distances.append(distances[i] + i * 2)
+        return distances

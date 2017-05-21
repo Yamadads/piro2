@@ -18,7 +18,8 @@ def test_distance_method():
     descriptor5 = "11000110000000000000000000000000000000000000000000000000000000000000000000000"
     descriptor6 = "10100110000000000000000010000000000000000000000000000000000000000000000000000"
 
-    parameters = param.get_parameters()
+    config = param.Parameters()
+    parameters = config.get_parameters()
     descriptor = ds.Descriptor(parameters)
 
     check(1, descriptor1, descriptor2, 0, parameters, descriptor)
@@ -71,7 +72,7 @@ def read_maches_file(path):
         line = i.split(",")
         matches.append([int(line[0]), int(line[1])])
 
-    return matches
+    return sorted(matches, key=lambda x: (x[0], x[1]))
 
 
 def create_bad_matches():
@@ -84,17 +85,8 @@ def create_bad_matches():
 def get_matches_results(matches, descriptors, parameters, descriptor):
     for i in range(len(matches)):
 
-        if len(matches[i]) != 2:
-            continue
-
         obj_1 = descriptors[matches[i][0]]
         obj_2 = descriptors[matches[i][1]]
-
-        if len(obj_1) == 0:
-            continue
-
-        if len(obj_2) == 0:
-            continue
 
         descriptor1 = copy.deepcopy(obj_1[0])
         descriptor2 = copy.deepcopy(obj_2[0])
@@ -103,12 +95,20 @@ def get_matches_results(matches, descriptors, parameters, descriptor):
 
 
 def check_descriptor():
-    data_path = 'samples/bikes/'
+
+    suite_name = 'bikes'
+    data_path = os.path.join('samples', suite_name)
+    results_path = os.path.join('results', suite_name)
+
     matches_filename = 'matches.csv'
     pictures_no = get_pictures_count(data_path)
     pictures = load_pictures(data_path, pictures_no)
-    matches = read_maches_file(data_path + matches_filename)
-    parameters = param.get_parameters()
+    matches = read_maches_file(os.path.join(data_path, matches_filename))
+
+    config = param.Parameters()
+    config.dump_to_file(os.path.join(results_path, 'params'))
+
+    parameters = config.get_parameters()
 
     descriptor = ds.Descriptor(parameters)
 
@@ -116,7 +116,6 @@ def check_descriptor():
 
     good_matches = get_matches_results(matches, descriptors, parameters, descriptor)
     bad_matches = get_matches_results(create_bad_matches(), descriptors, parameters, descriptor)
-
 
     if False:
         print("el1,el2,dist")
