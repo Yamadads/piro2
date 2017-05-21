@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import descriptor
+import descriptor as ds
 import sampling_pattern
 import cv2
 import os.path
@@ -10,8 +10,7 @@ import copy
 
 
 def test_distance_method():
-    # for i in range(100000): #100000
-    #    test_distance_method()
+
     descriptor1 = "01110011000000000000000000000000000000000000000000000000000000000000000000000"
     descriptor2 = "01110011000000000000000000000000000000000000000000000000000000000000000000000"
     descriptor3 = "01000011000000000000000000000000000000000000000000000000000000000000000000000"
@@ -19,16 +18,19 @@ def test_distance_method():
     descriptor5 = "11000110000000000000000000000000000000000000000000000000000000000000000000000"
     descriptor6 = "10100110000000000000000010000000000000000000000000000000000000000000000000000"
 
-    check(1, descriptor1, descriptor2, 0)
-    check(2, descriptor1, descriptor3, 2)
-    check(3, descriptor1, descriptor4, 0)
-    check(4, descriptor1, descriptor5, 1)
-    check(5, descriptor1, descriptor6, 2)
+    parameters = param.get_parameters()
+    descriptor = ds.Descriptor(parameters)
+
+    check(1, descriptor1, descriptor2, 0, parameters, descriptor)
+    check(2, descriptor1, descriptor3, 2, parameters, descriptor)
+    check(3, descriptor1, descriptor4, 0, parameters, descriptor)
+    check(4, descriptor1, descriptor5, 1, parameters, descriptor)
+    check(5, descriptor1, descriptor6, 2, parameters, descriptor)
 
 
-def check(id, desc1, desc2, correct_value):
-    if descriptor.distance(desc1, desc2) != correct_value:
-        print("false" + id.__str__())
+def check(suit_id, desc1, desc2, correct_value, parameters, descriptor):
+    if descriptor.distance(desc1, desc2, parameters) != correct_value:
+        print("false" + suit_id.__str__())
 
 
 def check_sampling_pattern():
@@ -39,6 +41,7 @@ def check_sampling_pattern():
 def get_pictures_count(directory_path):
 
     return len([name for name in os.listdir(directory_path) if name.endswith(".png")])
+
 
 def load_pictures(directory_path, pictures_no):
     pictures = []
@@ -51,11 +54,11 @@ def load_pictures(directory_path, pictures_no):
     return pictures
 
 
-def calc_descriptors(pictures, pictures_no, parameters):
+def calc_descriptors(pictures, pictures_no, descriptor):
     descriptors = []
     keypoints = [[31, 31]]
     for i in range(pictures_no):
-        descriptors.append(descriptor.extract(pictures[i], keypoints, parameters))
+        descriptors.append(descriptor.extract(pictures[i], keypoints))
     return descriptors
 
 
@@ -78,7 +81,7 @@ def create_bad_matches():
     return matches
 
 
-def get_matches_results(matches, descriptors, parameters):
+def get_matches_results(matches, descriptors, parameters, descriptor):
     for i in range(len(matches)):
 
         if len(matches[i]) != 2:
@@ -106,16 +109,24 @@ def check_descriptor():
     pictures = load_pictures(data_path, pictures_no)
     matches = read_maches_file(data_path + matches_filename)
     parameters = param.get_parameters()
-    descriptors = calc_descriptors(pictures, pictures_no, parameters)
 
-    good_matches = get_matches_results(matches, descriptors, parameters)
-    bad_matches = get_matches_results(create_bad_matches(), descriptors, parameters)
-    print("good")
-    for i in good_matches:
-        print(i)
-    print("bad")
-    for i in bad_matches:
-        print(i)
+    descriptor = ds.Descriptor(parameters)
+
+    descriptors = calc_descriptors(pictures, pictures_no, descriptor)
+
+    good_matches = get_matches_results(matches, descriptors, parameters, descriptor)
+    bad_matches = get_matches_results(create_bad_matches(), descriptors, parameters, descriptor)
+
+
+    if False:
+        print("el1,el2,dist")
+        for i in good_matches:
+            print(','.join([str(e) for e in i]))
+
+    if True:
+        print("el1,el2,dist")
+        for i in bad_matches:
+            print(','.join([str(e) for e in i]))
 
 
 def main():
@@ -124,4 +135,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # test_distance_method()
     main()

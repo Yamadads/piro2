@@ -1,37 +1,43 @@
 from extractor import describe_point as describe
 import sampling_pattern as sp
-import numpy as np
 
 
-def extract(image, keypoints, parameters):
-    pattern, gaussian_kernels_number = sp.get_sampling_pattern(parameters['pattern_size'],
-                                                               parameters['circle_points_number'],
-                                                               parameters['distances'])
-    descriptions = []
-    for i in keypoints:
-        descriptions.append(describe(image, i, pattern, gaussian_kernels_number, parameters))
-    return descriptions
+class Descriptor(object):
+    def __init__(self, parameters):
+        self.pattern, self.gaussian_kernels_number = sp.get_sampling_pattern(parameters['pattern_size'],
+                                                                             parameters['circle_points_number'],
+                                                                             parameters['distances'])
+        self.parameters = parameters
+        self.distance_threshold = parameters['distance_threshold']
 
+    def extract(self, image, keypoints):
 
-def distance(descriptor1, descriptor2, parameters):
-    min_global_distance = len(descriptor1) * parameters['circle_points_number']
-    shift = 1 << (parameters['circle_points_number'] - 1)
-    for i in range(parameters['circle_points_number']):
-        distance_sum = 0
-        for j in range(len(descriptor1)):
-            distance_sum += bin(descriptor1[j] ^ descriptor2[j]).count('1')
-            descriptor1[j] = (descriptor1[j] >> 1) if (descriptor1[j] & 1) == 0 else ((descriptor1[j] >> 1) ^ shift)
-            descriptor2[j] = (descriptor2[j] >> 1) if (descriptor2[j] & 1) == 0 else ((descriptor2[j] >> 1) ^ shift)
-            if distance_sum < min_global_distance:
-                min_global_distance = distance_sum
-    return min_global_distance / (len(descriptor1) * parameters['circle_points_number'])
+        descriptions = []
+        for image_point in keypoints:
+            descriptions.append(describe(image, image_point, self.pattern, self.gaussian_kernels_number, self.parameters))
+        return descriptions
 
+    def check_similarity(self, descriptor1, descriptor2):
+        """
+        :param descriptor1: 
+        :param descriptor2: 
+        :return True if distance between provided descriptors is not greater than threshold, False otherwise: 
+        """
+        return self.distance(descriptor1, descriptor2, self.parameters) <= self.distance_threshold
 
-def roll(number):
-    m = len(number)
-    a = 1 ^ number
-    number >> 1
-    number = number ^ 2
+    @staticmethod
+    def distance(descriptor1, descriptor2, parameters):
+        min_global_distance = len(descriptor1) * parameters['circle_points_number']
+        shift = 1 << (parameters['circle_points_number'] - 1)
+        for i in range(parameters['circle_points_number']):
+            distance_sum = 0
+            for j in range(len(descriptor1)):
+                distance_sum += bin(descriptor1[j] ^ descriptor2[j]).count('1')
+                descriptor1[j] = (descriptor1[j] >> 1) if (descriptor1[j] & 1) == 0 else ((descriptor1[j] >> 1) ^ shift)
+                descriptor2[j] = (descriptor2[j] >> 1) if (descriptor2[j] & 1) == 0 else ((descriptor2[j] >> 1) ^ shift)
+                if distance_sum < min_global_distance:
+                    min_global_distance = distance_sum
+        return min_global_distance / (len(descriptor1) * parameters['circle_points_number'])
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)
