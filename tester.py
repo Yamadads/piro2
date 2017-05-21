@@ -9,33 +9,6 @@ import random as rand
 import numpy as np
 import multiprocessing as mp
 import joblib as jb
-import threading
-
-
-
-def test_distance_method():
-
-    descriptor1 = "01110011000000000000000000000000000000000000000000000000000000000000000000000"
-    descriptor2 = "01110011000000000000000000000000000000000000000000000000000000000000000000000"
-    descriptor3 = "01000011000000000000000000000000000000000000000000000000000000000000000000000"
-    descriptor4 = "11100110000000000000000000000000000000000000000000000000000000000000000000000"
-    descriptor5 = "11000110000000000000000000000000000000000000000000000000000000000000000000000"
-    descriptor6 = "10100110000000000000000010000000000000000000000000000000000000000000000000000"
-
-    config = param.Parameters()
-    parameters = config.get_parameters()
-    descriptor = ds.Descriptor(parameters)
-
-    check(1, descriptor1, descriptor2, 0, parameters, descriptor)
-    check(2, descriptor1, descriptor3, 2, parameters, descriptor)
-    check(3, descriptor1, descriptor4, 0, parameters, descriptor)
-    check(4, descriptor1, descriptor5, 1, parameters, descriptor)
-    check(5, descriptor1, descriptor6, 2, parameters, descriptor)
-
-
-def check(suit_id, desc1, desc2, correct_value, parameters, descriptor):
-    if descriptor.distance(desc1, desc2, parameters) != correct_value:
-        print("false" + suit_id.__str__())
 
 
 def get_pictures_count(directory_path):
@@ -118,56 +91,71 @@ def get_results_mean(matches, descriptors, parameters, descriptor):
     return np.mean(result)
 
 
-def calculate_mean(circle_points_number, results_path, pictures, pictures_no, matches, bad_matches):
+def create_configurations():
+
+    configurations = []
+
+    for circle_points_number in range(4, 11):
+        for inner_steps in range(1, int(circle_points_number / 2)):
+            for levels_to_compare_center in [i for i in [1, 3, 7] if i <= circle_points_number]:
+                for levels_to_compare_inner in [i for i in [1, 3, 7] if i <= circle_points_number]:
+                    for outer_steps in [i for i in [1, 3, 7] if i <= circle_points_number]:
+                        configurations.append([
+                            circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
+                        ])
+
+    return configurations
+
+
+def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, configuration):
     config = param.Parameters()
+
+    circle_points_number = configuration[0]
+    inner_steps = configuration[1]
+    levels_to_compare_center = configuration[2]
+    levels_to_compare_inner = configuration[3]
+    outer_steps = configuration[4]
 
     config.set('circle_points_number', circle_points_number)
 
-    results = []
+    config.set('inner_steps', [i for i in range(1, int(circle_points_number / 2))])
+    config.set('levels_to_compare_center', [i for i in [1, 3, 7] if i <= levels_to_compare_center])
+    config.set('levels_to_compare_inner', [i for i in [1, 3, 7] if i <= levels_to_compare_inner])
+    config.set('outer_steps', [i for i in [1, 3, 7] if i <= outer_steps])
 
-    for inner_steps in range(1, int(circle_points_number / 2)):
-        for levels_to_compare_center in [i for i in [1, 3, 7] if i <= circle_points_number]:
-            for levels_to_compare_inner in [i for i in [1, 3, 7] if i <= circle_points_number]:
-                for outer_steps in [i for i in [1, 3, 7] if i <= circle_points_number]:
+    parameters = config.get_parameters()
 
-                    config.set('inner_steps', [i for i in range(1, int(circle_points_number / 2))])
-                    config.set('levels_to_compare_center', [i for i in [1, 3, 7] if i <= levels_to_compare_center])
-                    config.set('levels_to_compare_inner', [i for i in [1, 3, 7] if i <= levels_to_compare_inner])
-                    config.set('outer_steps', [i for i in [1, 3, 7] if i <= outer_steps])
+    suite_name = 'params_{0}_{1}_{2}_{3}_{4}'.format(
+        circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
+    )
 
-                    parameters = config.get_parameters()
+    dump_file_name = os.path.join(results_path, suite_name)
 
-                    suite_name = 'params_{0}_{1}_{2}_{3}_{4}'.format(
-                        circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
-                    )
+    descriptor = ds.Descriptor(parameters)
 
-                    dump_file_name = os.path.join(results_path, suite_name)
+    descriptors = calc_descriptors(pictures, pictures_no, descriptor)
 
-                    descriptor = ds.Descriptor(parameters)
+    good_matches_mean = get_results_mean(matches, descriptors, parameters, descriptor)
+    bad_matches_mean = get_results_mean(bad_matches, descriptors, parameters, descriptor)
 
-                    descriptors = calc_descriptors(pictures, pictures_no, descriptor)
+    mean_difference = bad_matches_mean - good_matches_mean
 
-                    good_matches_mean = get_results_mean(matches, descriptors, parameters, descriptor)
-                    bad_matches_mean = get_results_mean(bad_matches, descriptors, parameters, descriptor)
+    with open(dump_file_name, "w+") as dump:
+        dump.write('# Results section (good_mean, bad_mean, mean_difference\n')
+        dump.write(','.join(map(str, [good_matches_mean, bad_matches_mean, mean_difference, '\n'])))
 
-                    mean_difference = bad_matches_mean - good_matches_mean
+    config.dump_to_file(dump_file_name)
 
-                    with open(dump_file_name, "w+") as dump:
-                        dump.write('# Results section (good_mean, bad_mean, mean_difference\n')
-                        dump.write(','.join(map(str, [good_matches_mean, bad_matches_mean, mean_difference])))
+    result = ','.join(map(str, [suite_name, good_matches_mean, bad_matches_mean, mean_difference]))
+    # print("good matches mean is {0}".format(good_matches_mean))
+    # print("bad matches mean is {0}".format(bad_matches_mean))
 
-                    config.dump_to_file(dump_file_name)
-
-                    results.append(','.join(map(str, [suite_name, good_matches_mean, bad_matches_mean, mean_difference])))
-                    # print("good matches mean is {0}".format(good_matches_mean))
-                    # print("bad matches mean is {0}".format(bad_matches_mean))
-
-    return results
+    return result
 
 
 def check_descriptor():
 
-    suite_name = 'bikes'
+    suite_name = 'leuven'
     data_path = os.path.join('samples', suite_name)
     results_path = os.path.join('results', suite_name)
 
@@ -183,15 +171,16 @@ def check_descriptor():
     num_cores = mp.cpu_count()
     print('cpu count {0}'.format(num_cores))
 
-    results = jb.Parallel(n_jobs=7)(jb.delayed(calculate_mean)(
-        i, results_path, pictures, pictures_no, matches, bad_matches
-    ) for i in range(4, 11))
+    configurations = create_configurations()
+
+    results = jb.Parallel(n_jobs=num_cores)(jb.delayed(calculate_mean)(
+        results_path, pictures, pictures_no, matches, bad_matches, configurations[i]
+    ) for i in range(10))
 
     with open(os.path.join(results_path, 'master_results'), "w+") as dump:
         dump.write('suite_name, good_match_dist, bad_match_dist, diff\n')
-        for batch in results:
-            for line in batch:
-                dump.write(''.join([line, '\n']))
+        for line in results:
+            dump.write(''.join([line, '\n']))
 
     print('tests end')
 
