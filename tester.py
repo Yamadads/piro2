@@ -4,6 +4,7 @@ import descriptor
 import sampling_pattern
 import cv2
 import os.path
+import os
 import parameters as param
 import copy
 
@@ -35,8 +36,13 @@ def check_sampling_pattern():
     sampling_pattern.get_sampling_pattern(params['pattern_size'], params['circle_points_number'], params['distances'])
 
 
+def get_pictures_count(directory_path):
+
+    return len([name for name in os.listdir(directory_path) if name.endswith(".png")])
+
 def load_pictures(directory_path, pictures_no):
     pictures = []
+
     for i in range(pictures_no):
         str(1).zfill(2)
         img_path = os.path.join(directory_path, str(i).zfill(5) + ".png")
@@ -57,9 +63,11 @@ def read_maches_file(path):
     matches = []
     with open(path) as f:
         lines = f.read().splitlines()
+
     for i in lines:
         line = i.split(",")
         matches.append([int(line[0]), int(line[1])])
+
     return matches
 
 
@@ -72,8 +80,21 @@ def create_bad_matches():
 
 def get_matches_results(matches, descriptors, parameters):
     for i in range(len(matches)):
-        descriptor1 = copy.deepcopy(descriptors[matches[i][0]][0])
-        descriptor2 = copy.deepcopy(descriptors[matches[i][1]][0])
+
+        if len(matches[i]) != 2:
+            continue
+
+        obj_1 = descriptors[matches[i][0]]
+        obj_2 = descriptors[matches[i][1]]
+
+        if len(obj_1) == 0:
+            continue
+
+        if len(obj_2) == 0:
+            continue
+
+        descriptor1 = copy.deepcopy(obj_1[0])
+        descriptor2 = copy.deepcopy(obj_2[0])
         matches[i].append(descriptor.distance(descriptor1, descriptor2, parameters))
     return matches
 
@@ -81,7 +102,7 @@ def get_matches_results(matches, descriptors, parameters):
 def check_descriptor():
     data_path = 'samples/bikes/'
     matches_filename = 'matches.csv'
-    pictures_no = 750
+    pictures_no = get_pictures_count(data_path)
     pictures = load_pictures(data_path, pictures_no)
     matches = read_maches_file(data_path + matches_filename)
     parameters = param.get_parameters()
