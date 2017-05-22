@@ -7,7 +7,6 @@ class Parameters(object):
 
         config['pattern_size'] = 63  # window size (odd)
         config['circle_points_number'] = 8  # from 4 to 10
-        config['distances'] = self._get_distances()  # Rays of successive circles, max distance = 30
 
         # level IDs to compare with center, can be greater than levels number, from 1 to infinity
         config['levels_to_compare_center'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -23,8 +22,10 @@ class Parameters(object):
         config['levels_pairs'] = self._get_level_pairs()  # [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8],
         # [8, 9]]  # all pairs to compare from 1 to number of circles
 
-        config['circle_radius_ratio'] = 0.5 #0.5 to 0.6 ?
+        config['circle_radius_ratio'] = 0.5  # 0.5 to 0.6 ?
         config['distance_threshold'] = 0.5
+        config['distance_ratio'] = 2 # >0  <5
+        config['distances'] = self._get_distances(config['distance_ratio'])  # Rays of successive circles, max distance = 30
 
         self.config = config
 
@@ -49,8 +50,10 @@ class Parameters(object):
         return pairs
 
     @staticmethod
-    def _get_distances():
+    def _get_distances(distance_ratio):
         distances = [3]
         for i in range(50):
-            distances.append(distances[i] + i * 2)
+            distances.append(distances[i] + (i+1) * distance_ratio)
+            if distances[i] > 34:
+                break
         return distances
