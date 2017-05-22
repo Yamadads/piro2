@@ -62,6 +62,7 @@ def _inner_circle_comparison(kernel_level, step):
             level_descriptor += '1'
         else:
             level_descriptor += '0'
+
     return int(level_descriptor, 2)
 
 

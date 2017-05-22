@@ -38,11 +38,19 @@ class Descriptor(object):
             distance_sum = 0
             for j in range(len(c_descriptor1)):
                 distance_sum += bin(c_descriptor1[j] ^ c_descriptor2[j]).count('1')
-                c_descriptor1[j] = (c_descriptor1[j] >> 1) if (c_descriptor1[j] & 1) == 0 else ((c_descriptor1[j] >> 1) ^ shift)
-                c_descriptor2[j] = (c_descriptor2[j] >> 1) if (c_descriptor2[j] & 1) == 0 else ((c_descriptor2[j] >> 1) ^ shift)
-                if distance_sum < min_global_distance:
-                    min_global_distance = distance_sum
-        return min_global_distance #/ (len(c_descriptor1) * parameters['circle_points_number'])
+
+            if distance_sum < min_global_distance:
+                min_global_distance = distance_sum
+
+            for j in range(len(c_descriptor1)):
+                c_descriptor1[j] = Descriptor.left_roll(c_descriptor1[j], parameters['circle_points_number'])
+
+        return min_global_distance / (len(c_descriptor1) * parameters['circle_points_number'])
+
+    @staticmethod
+    def left_roll(vector, length):
+        return ((vector & 0x1) << (length - 1)) | (vector >> 1)
+
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)

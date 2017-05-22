@@ -61,7 +61,7 @@ def create_bad_matches(pictures_no, matches):
 
     bad_matches = []
 
-    while len(bad_matches) < pictures_no:
+    while len(bad_matches) < len(matches):
 
         num_1 = rand.randint(0, pictures_no - 2)
         num_2 = rand.randint(num_1 + 1, pictures_no - 1)
@@ -97,9 +97,9 @@ def create_configurations():
 
     for circle_points_number in range(4, 11):
         for inner_steps in range(1, int(circle_points_number / 2)):
-            for levels_to_compare_center in [i for i in [1, 3, 7] if i <= circle_points_number]:
-                for levels_to_compare_inner in [i for i in [1, 3, 7] if i <= circle_points_number]:
-                    for outer_steps in [i for i in [1, 3, 7] if i <= circle_points_number]:
+            for levels_to_compare_center in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
+                for levels_to_compare_inner in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
+                    for outer_steps in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
                         configurations.append([
                             circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
                         ])
@@ -119,9 +119,9 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
     config.set('circle_points_number', circle_points_number)
 
     config.set('inner_steps', [i for i in range(1, int(circle_points_number / 2))])
-    config.set('levels_to_compare_center', [i for i in [1, 3, 7] if i <= levels_to_compare_center])
-    config.set('levels_to_compare_inner', [i for i in [1, 3, 7] if i <= levels_to_compare_inner])
-    config.set('outer_steps', [i for i in [1, 3, 7] if i <= outer_steps])
+    config.set('levels_to_compare_center', [i for i in [z for z in range(1, 7)] if i <= levels_to_compare_center])
+    config.set('levels_to_compare_inner', [i for i in [z for z in range(1, 7)] if i <= levels_to_compare_inner])
+    config.set('outer_steps', [i for i in [z for z in range(1, 7)] if i <= outer_steps])
 
     parameters = config.get_parameters()
 
@@ -155,7 +155,7 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
 
 def check_descriptor():
 
-    suite_name = 'bark'
+    suite_name = 'mine'
     data_path = os.path.join('samples', suite_name)
     results_path = os.path.join('results', suite_name)
 
