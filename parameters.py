@@ -34,7 +34,7 @@ class Parameters(object):
         # [8, 9]]  # all pairs to compare from 1 to number of circles
 
 
-        config['distance_threshold'] = 0.5
+        #config['distance_threshold'] = 0.5
 
         self.config = config
 

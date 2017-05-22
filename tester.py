@@ -12,7 +12,6 @@ import joblib as jb
 
 
 def get_pictures_count(directory_path):
-
     return len([name for name in os.listdir(directory_path) if name.endswith(".png")])
 
 
@@ -48,7 +47,6 @@ def read_matches_file(path):
 
 
 def create_bad_matches(pictures_no, matches):
-
     reserved = {}
 
     rand.seed()
@@ -82,7 +80,6 @@ def get_matches_results(matches, descriptors, parameters, descriptor):
 
 
 def get_results_mean(matches, descriptors, parameters, descriptor):
-
     result = []
 
     for i in range(len(matches)):
@@ -92,17 +89,13 @@ def get_results_mean(matches, descriptors, parameters, descriptor):
 
 
 def create_configurations():
-
     configurations = []
 
-    for circle_points_number in range(4, 11):
-        for inner_steps in range(1, int(circle_points_number / 2)):
-            for levels_to_compare_center in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
-                for levels_to_compare_inner in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
-                    for outer_steps in [i for i in [z for z in range(1, 7)] if i <= circle_points_number]:
-                        configurations.append([
-                            circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
-                        ])
+    for circle_points_number in range(4, 12):
+        for distance_ratio in range(1, 6):
+            for circle_radius_ratio in range(50, 60):
+                configurations.append(
+                    [circle_points_number, float(distance_ratio), float(circle_radius_ratio / 100)])
 
     return configurations
 
@@ -111,22 +104,17 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
     config = param.Parameters()
 
     circle_points_number = configuration[0]
-    inner_steps = configuration[1]
-    levels_to_compare_center = configuration[2]
-    levels_to_compare_inner = configuration[3]
-    outer_steps = configuration[4]
+    distance_ratio = configuration[1]
+    circle_radius_ratio = configuration[2]
 
     config.set('circle_points_number', circle_points_number)
-
-    config.set('inner_steps', [i for i in range(1, int(circle_points_number / 2))])
-    config.set('levels_to_compare_center', [i for i in [z for z in range(1, 7)] if i <= levels_to_compare_center])
-    config.set('levels_to_compare_inner', [i for i in [z for z in range(1, 7)] if i <= levels_to_compare_inner])
-    config.set('outer_steps', [i for i in [z for z in range(1, 7)] if i <= outer_steps])
+    config.set('distance_ratio', distance_ratio)
+    config.set('circle_radius_ratio', circle_radius_ratio)
 
     parameters = config.get_parameters()
 
-    suite_name = 'params_{0}_{1}_{2}_{3}_{4}'.format(
-        circle_points_number, inner_steps, levels_to_compare_center, levels_to_compare_inner, outer_steps
+    suite_name = 'params_{0}_{1}_{2}'.format(
+        circle_points_number, int(distance_ratio), int(circle_radius_ratio * 10)
     )
 
     dump_file_name = os.path.join(results_path, suite_name)
@@ -154,8 +142,7 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
 
 
 def check_descriptor():
-
-    suite_name = 'mine'
+    suite_name = 'bark'
     data_path = os.path.join('samples', suite_name)
     results_path = os.path.join('results', suite_name)
 

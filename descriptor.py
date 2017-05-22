@@ -10,7 +10,7 @@ class Descriptor(object):
                                                                              parameters['distances'],
                                                                              parameters['circle_radius_ratio'])
         self.parameters = parameters
-        self.distance_threshold = parameters['distance_threshold']
+        #self.distance_threshold = parameters['distance_threshold']
 
     def extract(self, image, keypoints):
 
