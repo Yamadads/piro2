@@ -5,15 +5,16 @@ from PIL import Image
 import copy
 
 
-def get_sampling_pattern(pattern_size, circle_points_number, distances):
+def get_sampling_pattern(pattern_size, circle_points_number, distances, circle_radius_ratio):
     point_serial_num = int(0)
 
     sampling_pattern = _init_pattern(pattern_size)
     center_point = _get_pattern_center(pattern_size)
     _set_blurring_points(sampling_pattern, 2, center_point, point_serial_num, pattern_size)
-    max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number, point_serial_num)
-    #image = _create_image(sampling_pattern)
-    #show_image('sd', image, 0)
+    max_num = _fulfill_pattern(sampling_pattern, center_point, distances, pattern_size, circle_points_number,
+                               point_serial_num, circle_radius_ratio)
+    # image = _create_image(sampling_pattern)
+    # show_image('sd', image, 0)
     return sampling_pattern, max_num
 
 
@@ -50,19 +51,20 @@ def _get_pattern_center(pattern_size):
 
 
 def _set_blurring_points(pattern, radius, point, point_number, pattern_size):
-    for i in range(max(point[0] - int(radius+2), 0), min(point[0] + int(radius + 4), pattern_size - 1)):
-        for j in range(max(point[1] - int(radius+2), 0), min(point[1] + int(radius + 4), pattern_size - 1)):
+    for i in range(max(point[0] - int(radius + 2), 0), min(point[0] + int(radius + 4), pattern_size - 1)):
+        for j in range(max(point[1] - int(radius + 2), 0), min(point[1] + int(radius + 4), pattern_size - 1)):
             if _distance_between_points((i, j), point) <= radius + 0.3:  # heheszki wartość z palca
                 (pattern[j][i]).append(point_number)
 
 
-def _set_circle_points(pattern, radius, center, pattern_size, circle_points_number, point_serial_num, start_angle):
+def _set_circle_points(pattern, radius, center, pattern_size, circle_points_number, point_serial_num, start_angle,
+                       circle_radius_ratio):
     if radius > ((pattern_size / 2) - 3):
         return True, point_serial_num
     point1 = (radius * math.cos(0) + center[0], radius * math.sin(0) + center[1])
     point2 = (radius * math.cos(2 * math.pi / circle_points_number) + center[0],
               radius * math.sin(2 * math.pi / circle_points_number) + center[1])
-    circle_radius = _distance_between_points(point1, point2) / 2
+    circle_radius = _distance_between_points(point1, point2) * circle_radius_ratio
     for i in range(circle_points_number):
         point_serial_num += 1
         angle_radians = start_angle + (2 * math.pi / circle_points_number) * i
@@ -76,14 +78,15 @@ def _distance_between_points(point1, point2):
     return math.sqrt(math.pow(point1[1] - point2[1], 2) + math.pow(point1[0] - point2[0], 2))
 
 
-def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_number, point_serial_num):
+def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_number, point_serial_num,
+                     circle_radius_ratio):
     pattern_full = False
     temp_distances = copy.deepcopy(distances)
     counter = 0
     start_angle = (2 * math.pi / circle_points_number) / 2
     while (not pattern_full) and temp_distances:
         counter += 1
-        if counter% 2 == 0:
+        if counter % 2 == 0:
             angle = start_angle
         else:
             angle = 0
@@ -93,7 +96,8 @@ def _fulfill_pattern(pattern, center, distances, pattern_size, circle_points_num
                                                             pattern_size,
                                                             circle_points_number,
                                                             point_serial_num,
-                                                            angle)
+                                                            angle,
+                                                            circle_radius_ratio)
     point_serial_num += 1
     return point_serial_num
 

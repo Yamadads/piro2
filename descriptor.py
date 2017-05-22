@@ -7,7 +7,8 @@ class Descriptor(object):
     def __init__(self, parameters):
         self.pattern, self.gaussian_kernels_number = sp.get_sampling_pattern(parameters['pattern_size'],
                                                                              parameters['circle_points_number'],
-                                                                             parameters['distances'])
+                                                                             parameters['distances'],
+                                                                             parameters['circle_radius_ratio'])
         self.parameters = parameters
         self.distance_threshold = parameters['distance_threshold']
 
@@ -15,7 +16,8 @@ class Descriptor(object):
 
         descriptions = []
         for image_point in keypoints:
-            descriptions.append(describe(image, image_point, self.pattern, self.gaussian_kernels_number, self.parameters))
+            descriptions.append(
+                describe(image, image_point, self.pattern, self.gaussian_kernels_number, self.parameters))
         return descriptions
 
     def check_similarity(self, descriptor1, descriptor2):
@@ -50,7 +52,6 @@ class Descriptor(object):
     @staticmethod
     def left_roll(vector, length):
         return ((vector & 0x1) << (length - 1)) | (vector >> 1)
-
 
 # int_d1 = int(descriptor1, 2)
 # int_d2 = int(descriptor2, 2)

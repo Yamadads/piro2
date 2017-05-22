@@ -23,6 +23,7 @@ class Parameters(object):
         config['levels_pairs'] = self._get_level_pairs()  # [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8],
         # [8, 9]]  # all pairs to compare from 1 to number of circles
 
+        config['circle_radius_ratio'] = 0.5 #0.5 to 0.6 ?
         config['distance_threshold'] = 0.5
 
         self.config = config
