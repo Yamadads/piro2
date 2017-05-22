@@ -114,7 +114,7 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
     parameters = config.get_parameters()
 
     suite_name = 'params_{0}_{1}_{2}'.format(
-        circle_points_number, int(distance_ratio), int(circle_radius_ratio * 10)
+        circle_points_number, int(distance_ratio), int(circle_radius_ratio * 100)
     )
 
     dump_file_name = os.path.join(results_path, suite_name)
