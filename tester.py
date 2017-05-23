@@ -101,16 +101,16 @@ def create_configurations():
 
 
 def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, configuration):
-    config = param.Parameters()
+
 
     circle_points_number = configuration[0]
     distance_ratio = configuration[1]
     circle_radius_ratio = configuration[2]
 
-    config.set('circle_points_number', circle_points_number)
-    config.set('distance_ratio', distance_ratio)
-    config.set('circle_radius_ratio', circle_radius_ratio)
-
+    # config.set('circle_points_number', circle_points_number)
+    # config.set('distance_ratio', distance_ratio)
+    # config.set('circle_radius_ratio', circle_radius_ratio)
+    config = param.Parameters(circle_points_number, distance_ratio, circle_radius_ratio)
     parameters = config.get_parameters()
 
     suite_name = 'params_{0}_{1}_{2}'.format(
@@ -142,7 +142,7 @@ def calculate_mean(results_path, pictures, pictures_no, matches, bad_matches, co
 
 
 def check_descriptor():
-    suite_name = 'bark'
+    suite_name = 'bikes'
     data_path = os.path.join('samples', suite_name)
     results_path = os.path.join('results', suite_name)
 

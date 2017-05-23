@@ -2,7 +2,7 @@ import os as os
 
 
 class Parameters(object):
-    def __init__(self):
+    def __init__(self, circle_points_number, distance_ratio, circle_radius_ratio):
         config = {}
         # not set
         config['pattern_size'] = 63  # window size (odd)
@@ -12,21 +12,21 @@ class Parameters(object):
 
         # set
 
-        config['circle_points_number'] = 8  # from 4 to 10
-        config['distance_ratio'] = 2  # >0  <5
-        config['circle_radius_ratio'] = 0.5  # 0.5 to 0.6 ?
+        config['circle_points_number'] = circle_points_number  # from 4 to 10
+        config['distance_ratio'] = distance_ratio  # >0  <5
+        config['circle_radius_ratio'] = circle_radius_ratio  # 0.5 to 0.6 ?
 
         # auto set
 
         config['distances'] = self._get_distances(
             config['distance_ratio'])  # Rays of successive circles, max distance = 30
         config['outer_steps'] = [i for i in range(int(
-            config['circle_points_number']))]  # [0, 1, 2, 3, 4, 5]  # from 0 to circle_points_number - 1
+            config['circle_points_number'])+1)]  # [0, 1, 2, 3, 4, 5]  # from 0 to circle_points_number - 1
         # level IDs to compare with center, can be greater than levels number, from 1 to infinity
         config['levels_to_compare_center'] = [i for i in range(1,
             int(len(config['distances']))+1)]  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         # from 1 to half of the circle_points_number
-        config['inner_steps'] = [i for i in range(int(config['circle_points_number'] / 2))]  # [1, 2, 3]
+        config['inner_steps'] = [i for i in range(1, int(config['circle_points_number'] / 2)+1)]  # [1, 2, 3]
         # level IDs to compare with center, can be greater than levels number, from 1 to infinity
         config['levels_to_compare_inner'] = [i for i in range(1,
             int(len(config['distances'])+1))]  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -64,6 +64,6 @@ class Parameters(object):
         distances = [3]
         for i in range(50):
             distances.append(distances[i] + (i + 1) * distance_ratio)
-            if distances[i] > 33:
+            if distances[i+1] > 30:
                 break
         return distances
